@@ -38,12 +38,14 @@ import groovyx.gpars.dataflow.Dataflow
 import groovyx.gpars.dataflow.DataflowChannel
 import groovyx.gpars.dataflow.DataflowQueue
 import groovyx.gpars.dataflow.DataflowReadChannel
+import groovyx.gpars.dataflow.expression.DataflowExpression
 import groovyx.gpars.dataflow.operator.DataflowEventAdapter
 import groovyx.gpars.dataflow.operator.DataflowOperator
 import groovyx.gpars.dataflow.operator.DataflowProcessor
 import groovyx.gpars.dataflow.operator.PoisonPill
 import groovyx.gpars.dataflow.stream.DataflowStreamWriteAdapter
 import groovyx.gpars.group.PGroup
+import nextflow.Channel
 import nextflow.Nextflow
 import nextflow.Session
 import nextflow.exception.FailedGuardException
@@ -358,10 +360,23 @@ class TaskProcessor {
      *
      * See {@code DataflowProcessor}
      */
+    @CompileStatic
+    private DataflowReadChannel makeValueStoppable(DataflowReadChannel channel) {
+
+        if( channel instanceof DataflowExpression ) {
+            return (DataflowReadChannel)channel.then {
+                it==null || (it instanceof List && it.isEmpty()) || (it instanceof Object[] && ((Object[])it).length==0) ? Channel.STOP : it
+            }
+        }
+
+        return channel
+    }
 
     protected void createOperator() {
 
-        def opInputs = new ArrayList(config.getInputs().getChannels())
+        def skipEmpty = config.getSkipEmpty()
+        def inChannels = config.getInputs().getChannels()
+        def opInputs = skipEmpty ? inChannels.collect { makeValueStoppable(it) } : new ArrayList<>(inChannels)
 
         /*
          * check if there are some iterators declaration

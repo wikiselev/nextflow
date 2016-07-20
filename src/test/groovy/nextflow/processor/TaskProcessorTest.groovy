@@ -26,6 +26,10 @@ import java.nio.file.Paths
 import java.util.concurrent.ExecutorService
 
 import groovyx.gpars.agent.Agent
+import groovyx.gpars.dataflow.DataflowQueue
+import groovyx.gpars.dataflow.DataflowReadChannel
+import groovyx.gpars.dataflow.DataflowVariable
+import nextflow.Channel
 import nextflow.Global
 import nextflow.ISession
 import nextflow.Session
@@ -629,6 +633,70 @@ class TaskProcessorTest extends Specification {
         processor.visitOptions(param,'dir-name') == [type:'any', followLinks: true, maxDepth: 5, hidden: false, relative: false]
     }
 
+    def 'should return stop message' () {
 
+        given:
+        DataflowReadChannel c
+        def processor = [:] as TaskProcessor
+
+        when:
+        def queue = new DataflowQueue() << 1 << 2 << Channel.STOP
+        c = processor.makeValueStoppable(queue)
+        then:
+        c instanceof DataflowQueue
+        c.val == 1
+        c.val == 2
+        c.val == Channel.STOP
+
+        when:
+        def val = new DataflowVariable()
+        val << [1,2]
+        c = processor.makeValueStoppable(val)
+        then:
+        c instanceof DataflowVariable
+        c.val == [1,2]
+        c.val == [1,2]
+
+        when:
+        val = new DataflowVariable()
+        val << []
+        c = processor.makeValueStoppable(val)
+        then:
+        c instanceof DataflowVariable
+        c.val == Channel.STOP
+
+        when:
+        val = new DataflowVariable()
+        val << null
+        c = processor.makeValueStoppable(val)
+        then:
+        c instanceof DataflowVariable
+        c.val == Channel.STOP
+
+        when:
+        val = new DataflowVariable()
+        val << false
+        c = processor.makeValueStoppable(val)
+        then:
+        c instanceof DataflowVariable
+        c.val == false
+
+        when:
+        val = new DataflowVariable()
+        val << ([1,2] as Object[])
+        c = processor.makeValueStoppable(val)
+        then:
+        c instanceof DataflowVariable
+        c.val instanceof Object[]
+        c.val == [1,2]
+
+        when:
+        val = new DataflowVariable()
+        val << ([] as Object[])
+        c = processor.makeValueStoppable(val)
+        then:
+        c instanceof DataflowVariable
+        c.val == Channel.STOP
+    }
 
 }

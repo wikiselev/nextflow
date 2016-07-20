@@ -143,8 +143,9 @@ abstract class BaseParam {
         }
 
         // wrap a single value with a DataflowVariable
-        return Nextflow.variable(value)
-
+        def result = new DataflowVariable()
+        result.bind(value)
+        return result
     }
 
     /**
@@ -486,7 +487,9 @@ class EachInParam extends BaseInParam {
         }
 
         // the collection is wrapped to a "scalar" dataflow variable
-        Nextflow.variable(value)
+        def result = new DataflowVariable()
+        result.bind(value)
+        return result
     }
 
 

@@ -79,6 +79,7 @@ class ProcessConfig implements Map<String,Object> {
             'publishDir',
             'scratch',
             'shell',
+            'skipEmpty',
             'storeDir',
             'tag',
             'time',
@@ -373,6 +374,10 @@ class ProcessConfig implements Map<String,Object> {
     ProcessConfig errorStrategy( value ) {
         configProperties.put('errorStrategy', value)
         return this
+    }
+
+    boolean getSkipEmpty() {
+        configProperties.skipEmpty == null || configProperties.skipEmpty.toString() == 'true'
     }
 
 }

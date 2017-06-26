@@ -118,7 +118,7 @@ class DockerBuilderTest extends Specification {
                 .runCommand == 'docker run -i -e "BASH_ENV=/data/env\\ file" -v /home/db:/home/db -v "$PWD":"$PWD" -w "$PWD" fedora'
 
         new DockerBuilder('fedora')
-                .params(writableInputMounts: false)
+                .params(readOnlyInputs: true)
                 .addMount(db_file)
                 .build()
                 .runCommand == 'docker run -i -v /home/db:/home/db:ro -v "$PWD":"$PWD" -w "$PWD" fedora'

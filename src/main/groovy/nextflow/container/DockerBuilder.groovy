@@ -56,7 +56,7 @@ class DockerBuilder extends ContainerBuilder {
 
     private boolean legacy
 
-    private boolean writableInputMounts
+    private boolean writableInputMounts = true
 
     DockerBuilder( String name ) {
         this.image = name

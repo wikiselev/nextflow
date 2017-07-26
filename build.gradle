@@ -106,6 +106,7 @@ configurations {
     ignite.extendsFrom runtime
     console.extendsFrom runtime
     gdocLibs.extendsFrom runtime
+    ga4gh.extendsFrom runtime
 }
 
 dependencies {
@@ -164,6 +165,9 @@ dependencies {
         exclude module: 'nextflow'
     }
 
+    ga4gh(project(':nxf-ga4gh')) {
+        exclude module: 'nextflow'
+    }
     // Documentation required libraries
     gdocLibs 'org.fusesource.jansi:jansi:1.11'
     gdocLibs "org.codehaus.groovy:groovy-groovydoc:2.4.11"
@@ -591,10 +595,10 @@ task dnanexus(dependsOn: packDx) {
  * Save the runtime classpath
  */
 task exportClasspath {
-    dependsOn configurations.ignite, configurations.console
+    dependsOn configurations.ignite, configurations.console, configurations.ga4gh
 
     def home = System.getProperty('user.home')
-    def all = configurations.ignite + configurations.console
+    def all = configurations.ignite + configurations.console + configurations.ga4gh
     def libs = all.collect { File file -> /* println file.canonicalPath.replace(home, '$HOME'); */ file.canonicalPath;  }
     new File('.launch.classpath').text = libs.join(':')
 }
